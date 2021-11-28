@@ -4,6 +4,10 @@ Read Swedish news from SVT Text in the terminal. Fetching and parsing directly f
 
 **Work in progress. Compile and run as you like at moment using the go cli**
 
+## Example
+
+![Example](./doc/example.png)
+
 ## Usage
 
 ```sh
