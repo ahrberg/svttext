@@ -6,7 +6,9 @@ Read Swedish news from SVT Text in the terminal. Fetching and parsing directly f
 
 ## Example
 
-![Example](./doc/example.png)
+**Interactive mode with colors**
+
+![Example](./doc/example.gif)
 
 ## Usage
 
