@@ -12,7 +12,7 @@ func TestGetNews(t *testing.T) {
 		t.Error("No error expected")
 	}
 
-	if text == "" {
+	if len(text.Text) < 1 {
 		t.Error("Could not find screen reader content")
 	}
 }
@@ -25,7 +25,7 @@ func TestGetNewsNotFound(t *testing.T) {
 		t.Error("No error expected")
 	}
 
-	if text != "" {
+	if len(text.Text) > 0 {
 		t.Error("Expecting empty text for non existing page")
 	}
 }

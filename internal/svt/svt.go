@@ -1,17 +1,16 @@
 package svt
 
 import (
+	"encoding/json"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
-
-	"golang.org/x/net/html"
 )
 
 const (
-	defaultBaseURL = "https://www.svt.se/text-tv"
+	defaultBaseURL = "https://www.svt.se/text-tv/api"
 	userAgent      = "gosvttext"
 )
 
@@ -19,6 +18,31 @@ type Client struct {
 	BaseUrl    string
 	UserAgent  string
 	HTTPClient *http.Client
+}
+
+type svtTextRes struct {
+	Status string `json:"status"`
+	Data   struct {
+		PageNumber string `json:"pageNumber"`
+		PrevPage   string `json:"prevPage"`
+		NextPage   string `json:"nextPage"`
+		SubPages   []struct {
+			SubPageNumber string `json:"subPageNumber"`
+			GifAsBase64   string `json:"gifAsBase64"`
+			ImageMap      string `json:"imageMap"`
+			AltText       string `json:"altText"`
+		} `json:"subPages"`
+		Meta struct {
+			Updated time.Time `json:"updated"`
+		} `json:"meta"`
+	} `json:"data"`
+}
+
+type SvtPage struct {
+	Text       []string
+	PageNumber string
+	PrevPage   string
+	NextPage   string
 }
 
 func NewClient() *Client {
@@ -34,25 +58,37 @@ func NewClient() *Client {
 	}
 }
 
-func (c *Client) GetNews(page string) (string, error) {
-	body, err := c.getPage(page)
+func (c *Client) GetNews(page string) (*SvtPage, error) {
+	news, err := c.getPage(page)
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	readable, err := parseReadable(body)
-
-	if err != nil {
-		return "", err
+	if news.Status != "success" {
+		return &SvtPage{
+			Text:       []string{},
+			PageNumber: news.Data.PageNumber,
+			PrevPage:   news.Data.PrevPage,
+			NextPage:   news.Data.NextPage,
+		}, nil
 	}
 
-	readable = cleanUp(readable)
+	var texts = []string{}
+	for _, page := range news.Data.SubPages {
+		cleanText := cleanUp(page.AltText)
+		texts = append(texts, cleanText)
+	}
 
-	return readable, nil
+	return &SvtPage{
+		Text:       texts,
+		PageNumber: news.Data.PageNumber,
+		PrevPage:   news.Data.PrevPage,
+		NextPage:   news.Data.NextPage,
+	}, nil
 }
 
-func (c *Client) getPage(page string) (io.Reader, error) {
+func (c *Client) getPage(page string) (*svtTextRes, error) {
 	url := fmt.Sprintf("%s/%s", c.BaseUrl, page)
 	req, err := http.NewRequest("GET", url, nil)
 
@@ -66,41 +102,20 @@ func (c *Client) getPage(page string) (io.Reader, error) {
 		return nil, err
 	}
 
-	return res.Body, nil
-}
+	body, err := ioutil.ReadAll(res.Body)
 
-func parseReadable(body io.Reader) (string, error) {
-
-	// Find the content of div with class name
-	const screenReaderClassMatch = "screenreaderOnly"
-
-	doc, err := html.Parse(body)
 	if err != nil {
-		return "", nil
-	}
-	var f func(*html.Node) string
-
-	f = func(n *html.Node) string {
-		if n.Type == html.ElementNode && n.Data == "div" {
-			for _, a := range n.Attr {
-				if a.Key == "class" && strings.Contains(a.Val, screenReaderClassMatch) {
-					return n.FirstChild.Data
-				}
-			}
-		}
-		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			readable := f(c)
-
-			if readable != "" {
-				return readable
-			}
-		}
-		return ""
+		return nil, err
 	}
 
-	readable := f(doc)
+	var s = new(svtTextRes)
+	err = json.Unmarshal(body, &s)
 
-	return readable, nil
+	if err != nil {
+		return nil, err
+	}
+
+	return s, nil
 }
 
 func cleanUp(text string) string {
