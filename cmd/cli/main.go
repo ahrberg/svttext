@@ -11,6 +11,9 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+// Set by ldflags
+var version string
+
 func main() {
 	// Program usage
 	flag.Usage = func() {
@@ -24,8 +27,14 @@ func main() {
 	// Program inputs
 	colors := flag.Bool("colors", false, "colorize the output")
 	interactive := flag.Bool("interactive", false, "start interactive mode\nuse arrow keys to navigate pages\nor enter page number to go to page")
+	versionFlag := flag.Bool("version", false, "prints svttext version")
 
 	flag.Parse()
+
+	if *versionFlag {
+		fmt.Println(version)
+		os.Exit(0)
+	}
 
 	page := "100" // Default to page 100 if nothing else specified
 
