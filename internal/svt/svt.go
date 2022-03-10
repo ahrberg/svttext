@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -122,6 +123,31 @@ func cleanUp(text string) string {
 	ret := strings.ReplaceAll(text, "m ndag", "måndag")
 	ret = strings.ReplaceAll(ret, "l rdag", "lördag")
 	ret = strings.ReplaceAll(ret, "s ndag", "söndag")
+	ret = centerPageNr(ret)
 
 	return ret
+}
+
+// centerPageNr centers page numbers if the page number is the only
+// charachters on the line
+func centerPageNr(text string) string {
+	lines := strings.Split(text, "\n")
+	res := ""
+	for i := 0; i < len(lines)-1; i++ {
+		l := lines[i]
+		match, err := regexp.Match(`^ \d{3} $`, []byte(l))
+
+		if err != nil {
+			res += l + "\n"
+			continue
+		}
+
+		if match != true {
+			res += l + "\n"
+			continue
+		}
+
+		res += "                  " + l + "\n"
+	}
+	return res
 }

@@ -29,3 +29,28 @@ func TestGetNewsNotFound(t *testing.T) {
 		t.Error("Expecting empty text for non existing page")
 	}
 }
+
+func TestCenterPageNr(t *testing.T) {
+	// Arrange
+	text := "hej\n 102 \n"
+	expected := "hej\n                   102 \n"
+
+	// Act
+	res := centerPageNr(text)
+
+	// Assert
+	if res != expected {
+		t.Errorf("Page number not centered, expected:`%s`, got:`%s`", expected, res)
+	}
+
+	// Arrange
+	text = "hej\n 1043\n103\n 11\ntest\n"
+
+	// Act
+	res = centerPageNr(text)
+
+	// Assert
+	if res != text {
+		t.Error("Result not expected to be modified")
+	}
+}
