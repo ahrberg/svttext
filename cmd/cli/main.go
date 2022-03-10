@@ -204,12 +204,13 @@ func (m model) View() string {
 
 	res := ""
 
-	if m.pageInp != "" {
-		res += fmt.Sprintf("🔎 %s\n\n", m.pageInp)
-	}
-
 	if len(m.news.text) > 0 {
 		res += m.news.text[m.subPageIndex]
+	}
+
+	if m.pageInp != "" {
+		res = strings.Replace(res, "\n", "", 2)
+		res = fmt.Sprintf("  🔎 %s\n\n%s", m.pageInp, res)
 	}
 
 	if m.news.errMsg != "" {
