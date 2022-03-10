@@ -130,12 +130,14 @@ func cleanUp(text string) string {
 
 // centerPageNr centers page numbers if the page number is the only
 // charachters on the line
+//
+// can be of shape " 101 " or " 101-102 "
 func centerPageNr(text string) string {
 	lines := strings.Split(text, "\n")
 	res := ""
 	for i := 0; i < len(lines)-1; i++ {
 		l := lines[i]
-		match, err := regexp.Match(`^ \d{3} $`, []byte(l))
+		match, err := regexp.Match(`(^ \d{3} $)|(^ \d{3}-\d{3} $)`, []byte(l))
 
 		if err != nil {
 			res += l + "\n"

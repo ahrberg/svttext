@@ -31,26 +31,19 @@ func TestGetNewsNotFound(t *testing.T) {
 }
 
 func TestCenterPageNr(t *testing.T) {
-	// Arrange
-	text := "hej\n 102 \n"
-	expected := "hej\n                   102 \n"
-
-	// Act
-	res := centerPageNr(text)
-
-	// Assert
-	if res != expected {
-		t.Errorf("Page number not centered, expected:`%s`, got:`%s`", expected, res)
+	cases := []struct {
+		text     string
+		expected string
+	}{
+		{"hej\n 102 \n", "hej\n                   102 \n"},
+		{"hej\n 102-103 \n", "hej\n                   102-103 \n"},
+		{"hej\n1033\n 1012-103 \n", "hej\n1033\n 1012-103 \n"},
 	}
+	for _, tc := range cases {
+		res := centerPageNr(tc.text)
 
-	// Arrange
-	text = "hej\n 1043\n103\n 11\ntest\n"
-
-	// Act
-	res = centerPageNr(text)
-
-	// Assert
-	if res != text {
-		t.Error("Result not expected to be modified")
+		if res != tc.expected {
+			t.Errorf("Test page number test failed, expected:`%s`, got:`%s`", tc.expected, res)
+		}
 	}
 }
