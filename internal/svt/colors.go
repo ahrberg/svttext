@@ -18,6 +18,7 @@ func ColorPage(text string) string {
 	res = colorPageNumbers(res)
 	res = colorSvt(res)
 	res = colorInfo(res)
+	res = colorStars(res)
 	return res
 }
 
@@ -41,6 +42,12 @@ func colorInfo(text string) string {
 
 func colorSvt(text string) string {
 	r := regexp.MustCompile(`SVT Text`)
+	colored := r.ReplaceAllStringFunc(text, colorString(yellowBold))
+	return colored
+}
+
+func colorStars(text string) string {
+	r := regexp.MustCompile(`[*]`)
 	colored := r.ReplaceAllStringFunc(text, colorString(yellowBold))
 	return colored
 }
