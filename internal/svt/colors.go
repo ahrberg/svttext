@@ -29,7 +29,7 @@ func colorPageNumbers(text string) string {
 }
 
 func colorFooter(text string) string {
-	r := regexp.MustCompile(`Inrikes|Utrikes|Innehåll|Sport|Ekonomi`)
+	r := regexp.MustCompile(`Inrikes|Utrikes|Innehåll|Sport|Ekonomi|Nyheter|Börsen`)
 	colored := r.ReplaceAllStringFunc(text, colorString(yellowBold))
 	return colored
 }
