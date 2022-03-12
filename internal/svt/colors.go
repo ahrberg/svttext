@@ -3,6 +3,7 @@ package svt
 import (
 	"fmt"
 	"regexp"
+	"strings"
 )
 
 type Color string
@@ -23,8 +24,27 @@ func ColorPage(text string) string {
 }
 
 func colorPageNumbers(text string) string {
-	r := regexp.MustCompile(`\d{3}`)
-	colored := r.ReplaceAllStringFunc(text, colorString(boldBold))
+	r := regexp.MustCompile(`[ .-]([1-8]\d{2})[ \nf]`)
+	res := r.FindAllStringSubmatch(text, -1)
+
+	numbers := make(map[string]struct{}, 0)
+
+	for _, matches := range res {
+		no := matches[1] // page number will be the subgroup match
+		_, found := numbers[no]
+		if found == false {
+			numbers[no] = struct{}{}
+		}
+
+	}
+
+	colored := text
+
+	for no := range numbers {
+		coloredNo := colorString(boldBold)(no)
+		colored = strings.ReplaceAll(colored, no, coloredNo)
+	}
+
 	return colored
 }
 
